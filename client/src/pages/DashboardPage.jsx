@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import RecentAttempts from '../components/RecentAttempts.jsx'
 import { api } from '../services/api.js'
 
-function DashboardPage({ user, onLibrary, onProblemClick }) {
+function DashboardPage({ user, onLibrary, onProblemClick, onRecommendation }) {
   const [attemptData, setAttemptData] = useState({ data: [], summary: null })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -30,6 +30,10 @@ function DashboardPage({ user, onLibrary, onProblemClick }) {
         <article><strong>{summary ? summary.solved + summary.solved_with_hint : '—'}</strong><span>Solved</span></article>
         <article><strong>{summary?.failed ?? '—'}</strong><span>To revisit</span></article>
       </div>
+      <section className="recommended-next">
+        <div><p className="eyebrow">Personalized practice</p><h2>Not sure where to start?</h2><p>Get a transparent next-problem recommendation based on your attempt history.</p></div>
+        <button className="button secondary" onClick={onRecommendation}>See recommended next</button>
+      </section>
       <section className="section-heading"><div><p className="eyebrow">Practice history</p><h2>Recent attempts</h2></div></section>
       <RecentAttempts attempts={attemptData.data} loading={loading} error={error} onProblemClick={onProblemClick} />
     </section>

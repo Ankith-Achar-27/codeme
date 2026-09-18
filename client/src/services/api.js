@@ -16,6 +16,7 @@ async function request(path, options = {}) {
 
 export const api = {
   getDemoUser: () => request('/users/demo', { method: 'POST' }),
+  getRecommendation: (userId) => request(`/users/${userId}/recommendation`),
   getProblems: (params) => request(`/problems?${new URLSearchParams(params)}`),
   getProblem: (id) => request(`/problems/${id}`),
   getAttempts: (userId, params = {}) => request(`/attempts/${userId}?${new URLSearchParams(params)}`),

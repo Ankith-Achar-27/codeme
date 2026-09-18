@@ -24,6 +24,8 @@ const problemSchema = new mongoose.Schema(
 )
 
 problemSchema.index({ difficulty: 1, topics: 1 })
-problemSchema.index({ topics: 1, concepts: 1 })
+problemSchema.index({ topics: 1 })
+problemSchema.index({ concepts: 1 })
+problemSchema.index({ title: 1 })
 
 export default mongoose.model('Problem', problemSchema)

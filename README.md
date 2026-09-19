@@ -323,4 +323,5 @@ Automated validation included backend tests, frontend linting, production builds
 
 ## 👥 Team
 
-Built with ❤️ by **Team Erebus** for the **AI for Learning Hackathon**.
+**Team Erebus** · AI for Learning Hackathon  
+*Organized by CodeMyFYP · National Virtual Hackathon*

@@ -206,6 +206,24 @@ npm run build
 
 ---
 
+## 🤖 AI Use Declaration
+
+AI tools were used during the development of CodeMe to assist with implementation, debugging, documentation, UI refinement, testing, and development guidance.
+
+### Tools Used
+
+- **ChatGPT** — Used for architecture planning, technical reasoning, debugging guidance, feature planning, code review, and documentation support.
+- **Antigravity** — Used as a coding agent to implement and refine frontend/backend features, tests, UI changes, and deployment-related configuration.
+- **Gemini** — Integrated into CodeMe as the AI Tutor for progressive DSA hints and solution/concept explanations.
+
+### Verification
+
+AI-generated code and suggestions were reviewed and tested by the team. We personally verified core application flows including problem browsing, problem details, attempt recording, personalized recommendations, analytics, AI Tutor behavior, database persistence, deployment connectivity, error handling, and production builds.
+
+Automated validation included backend tests, frontend linting, production builds, and validation of the complete 104-problem catalog.
+
+---
+
 ## 👥 Team
 
 Built with ❤️ by **Team Erebus** for the **AI for Learning Hackathon**.

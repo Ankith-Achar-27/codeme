@@ -2,8 +2,7 @@
 
 > Your DSA practice, personalized.
 
-**[🚀 Try CodeMe Live](https://codeme-phi.vercel.app/)**  
-**[GitHub Repository](https://github.com/Ankith-Achar-27/codeme)**
+**[🚀 Try CodeMe Live](https://codeme-phi.vercel.app/)**
 
 CodeMe is a personalized DSA practice platform designed to guide learners through targeted algorithmic problem solving. It analyzes a learner's attempt history and topic weaknesses to recommend the most relevant next challenge, while providing a pedagogical AI Tutor powered by Google Gemini to offer progressive hints when learners get stuck.
 

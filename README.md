@@ -50,7 +50,7 @@ Traditional DSA preparation platforms suffer from three core pedagogical flaws:
 - **Weakness Detection**: Directly identifies topics needing reinforcement and factors them into upcoming recommendations.
 
 ### 4. 📚 Curated Problem Catalog
-- **104 curated DSA problems** with concise descriptions, input/output examples, constraints, topic tags, and static hints.
+- **104 curated DSA problems** with problem-specific descriptions, input/output examples with explanations, constraints, topic tags, and static hints.
 - Real-time search, difficulty filters, and topic chips.
 
 ---
@@ -66,7 +66,7 @@ Traditional DSA preparation platforms suffer from three core pedagogical flaws:
                 ▼
 ┌────────────────────────────────┐
 │      Render (Backend API)      │
-│    Node.js · Express Engine    │
+│     Node.js · Express API      │
 └───────┬────────────────┬───────┘
         │                │
         ▼                ▼
@@ -192,12 +192,12 @@ npm run dev
 CodeMe is engineered with strict reliability, deterministic behavior, and resilience guarantees across both frontend and backend systems.
 
 ### 1. Automated Test Suites
-- **Backend Services (28/28 passing)**: Verifies deterministic recommendation scoring, failure recovery logic, topic mastery aggregations, strict Gemini JSON schema parsing, and graceful 502/503 network error handling:
+- **Backend Services (30/30 passing)**: Verifies deterministic recommendation scoring, failure recovery logic, topic mastery aggregations, strict Gemini JSON schema parsing, graceful API error handling, and catalog integrity:
   ```bash
   cd server
   npm test
   ```
-- **Catalog Integrity (104/104 problems verified)**: Automated validation tests ensuring every problem contains valid descriptions, input/output test cases, difficulty classifications, topic tags, and static hints without missing schema fields.
+- **Catalog Integrity (104/104 verified)**: Validates that all 104 problems contain problem-specific descriptions, input/output examples with explanations, constraints, difficulty classifications, topic tags, and static hints without missing schema fields.
 - **Frontend State & Parsers (16/16 passing)**: Verifies LaTeX and math notation sanitization, bold/code token protection, single-request hint progression, local state transitions, double-click deduplication, and cooldown timer enforcement:
   ```bash
   cd client
@@ -239,7 +239,7 @@ CodeMe is engineered with strict reliability, deterministic behavior, and resili
 ## ⚠️ Known Limitations
 
 - **External Code Execution**: CodeMe currently focuses on algorithmic problem solving, recommendation, and AI tutoring. Learners execute their code in their preferred local editor or runtime, logging their attempt outcome. In-browser sandboxed execution is prioritized on the upcoming roadmap.
-- **Single-Learner Session**: The current build uses a dedicated local learner profile rather than multi-tenant OAuth, keeping onboarding instantaneous with zero friction during hackathon evaluation.
+- **Single-Learner Session**: The hackathon build uses a dedicated demo learner profile rather than multi-user authentication, keeping evaluation friction-free.
 - **Catalog Scope**: The catalog is currently curated to 104 high-frequency DSA problems spanning core patterns (Two Pointers, Sliding Window, Trees, Graphs, DP, etc.).
 
 ---

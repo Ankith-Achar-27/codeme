@@ -2,6 +2,12 @@
 
 > Your DSA practice, personalized.
 
+<p align="center">
+  <a href="https://codeme-phi.vercel.app/">
+    <strong>🚀 Try CodeMe Live</strong>
+  </a>
+</p>
+
 CodeMe is a personalized DSA practice platform built for the **AI for Learning Hackathon**. It analyzes a learner's solving history, topic mastery, difficulty progression, failures, and recency to recommend what they should practice next—paired with a pedagogical AI Tutor powered by Google Gemini.
 
 ---
@@ -55,6 +61,13 @@ CodeMe is a personalized DSA practice platform built for the **AI for Learning H
 │ Practice Data│   │(Quota-Optimized AI Tutor) │
 └──────────────┘   └───────────────────────────┘
 ```
+
+### Live Deployment
+
+- **Frontend**: [https://codeme-phi.vercel.app/](https://codeme-phi.vercel.app/) (Vercel)
+- **Backend**: Hosted on Render
+- **Database**: MongoDB Atlas
+- **AI**: Google Gemini (`gemini-3.6-flash`)
 
 ---
 

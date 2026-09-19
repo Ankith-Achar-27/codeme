@@ -208,19 +208,19 @@ CodeMe is engineered with strict reliability, deterministic behavior, and resili
 - **Code Quality**: Zero lint warnings or errors under Oxlint and successful production builds.
 
 ### 2. Error States & Quota Resilience
-- **Zero-Extra-API Hint Progression**: A single Gemini generation request returns all 3 progressive hints at once. Tiers 2 and 3 are revealed instantly in-memory—eliminating latency, rate-limit triggers, and extra cost.
+- **Zero-Extra-API Hint Progression**: A single Gemini generation request returns all 3 progressive hints at once. Tiers 2 and 3 are revealed instantly in-memory, reducing latency, API requests, and quota consumption.
 - **Debounce & 15-Second Cooldown**: Prevents rapid multi-clicking and protects free-tier API quotas with visual cooldown timers and disabled button states.
 - **Graceful Degradation**: If the Gemini API is unreachable or returns a 502/503 status, CodeMe catches the exception gracefully, informs the learner clearly, and seamlessly provides curated static problem hints so practice is never interrupted.
 - **Notation & Math Protection**: Custom sanitization prevents raw LaTeX or Big-O notation (`O(N log N)`) from breaking markdown parsers or producing ugly formatting artifacts.
 
 ### 3. Basic Security & Environment Isolation
-- **Credential Protection**: Zero secrets or API keys are committed to source control (strictly enforced via `.gitignore` with only clean `.env.example` templates provided).
+- **Credential Protection**: No secrets or API keys are committed to source control. Environment files are excluded through `.gitignore`, with clean `.env.example` templates provided.
 - **Backend Isolation**: Gemini API keys reside exclusively on the Render backend service; the client SPA has zero access to private provider tokens.
 - **CORS Whitelist**: Strict CORS middleware configured to accept requests only from the verified client origin.
 - **Input Sanitization**: Problem and attempt IDs are validated against MongoDB ObjectId patterns before querying to prevent query injection.
 
 ### 4. Accessibility & User Experience
-- High-contrast, dark-mode optimized color palette adhering to WCAG readability standards.
+- High-contrast dark-mode interface designed for readable text and clear visual hierarchy.
 - Fully responsive layout adapting across mobile, tablet, and desktop viewports.
 - Clear visual focus states, micro-animations, and accessible loading states across all asynchronous interactions.
 

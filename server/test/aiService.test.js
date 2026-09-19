@@ -19,7 +19,7 @@ const mockProblem = {
 }
 
 function createMockFetch({ status = 200, content = 'Mocked AI guidance text', error = null } = {}) {
-  return async (_url, options) => {
+  return async (url, options) => {
     if (error) throw error
 
     if (status !== 200) {
@@ -34,32 +34,65 @@ function createMockFetch({ status = 200, content = 'Mocked AI guidance text', er
       ok: true,
       status: 200,
       json: async () => ({
-        choices: [
+        candidates: [
           {
-            message: {
-              content,
+            content: {
+              parts: [{ text: content }],
+              role: 'model',
             },
+            finishReason: 'STOP',
           },
         ],
       }),
+      url,
       options,
     }
   }
 }
 
-test('1. Hint request with valid problem produces structured prompt and hint output', async () => {
+test('1. Hint request with valid problem calls Gemini endpoint with x-goog-api-key header', async () => {
   const originalKey = process.env.AI_API_KEY
   try {
-    process.env.AI_API_KEY = 'test-key-123'
-    const mockFetch = createMockFetch({ content: 'Think about how looking up values in a hash map can help find complements.' })
+    process.env.AI_API_KEY = 'test-gemini-key'
+    let interceptedUrl = null
+    let interceptedHeaders = null
+    let interceptedBody = null
+
+    const mockFetch = async (url, options) => {
+      interceptedUrl = url
+      interceptedHeaders = options.headers
+      interceptedBody = JSON.parse(options.body)
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [{ text: 'Think about how looking up values in a hash map can help find complements.' }],
+              },
+              finishReason: 'STOP',
+            },
+          ],
+        }),
+      }
+    }
+
     const result = await generateAiHint(mockProblem, 1, { fetchFn: mockFetch })
 
     assert.equal(result.level, 1)
     assert.match(result.hint, /hash map/i)
+    assert.match(interceptedUrl, /generativelanguage\.googleapis\.com/)
+    assert.match(interceptedUrl, /gemini-3\.6-flash:generateContent/)
+    assert.equal(interceptedHeaders['x-goog-api-key'], 'test-gemini-key')
+
+    assert.ok(interceptedBody.systemInstruction)
+    assert.ok(interceptedBody.contents)
   } finally {
     process.env.AI_API_KEY = originalKey
   }
 })
+
 
 test('2. Hint levels 1 -> 2 -> 3 construct progressively specific pedagogical prompts', async () => {
   const p1 = buildHintPrompt(mockProblem, 1)

@@ -1,5 +1,6 @@
-const DEFAULT_API_URL = 'https://api.openai.com/v1/chat/completions'
-const DEFAULT_MODEL = 'gpt-4o-mini'
+const DEFAULT_MODEL = 'gemini-3.6-flash'
+const DEFAULT_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta'
+
 
 export function isAiConfigured() {
   return Boolean(process.env.AI_API_KEY && process.env.AI_API_KEY.trim())
@@ -61,7 +62,16 @@ Provide a beginner-friendly, pedagogical concept explanation for this problem fo
   return { systemMessage, userMessage }
 }
 
-async function callOpenAiCompatibleApi({ systemMessage, userMessage, fetchFn = globalThis.fetch }) {
+function getGeminiEndpoint(model) {
+  const customUrl = process.env.AI_API_URL?.trim()
+  if (customUrl) {
+    return customUrl.includes('{model}') ? customUrl.replace('{model}', model) : customUrl
+  }
+  const baseUrl = process.env.GEMINI_API_BASE_URL?.trim() || DEFAULT_API_BASE_URL
+  return `${baseUrl}/models/${model}:generateContent`
+}
+
+async function callGeminiApi({ systemMessage, userMessage, fetchFn = globalThis.fetch }) {
   const apiKey = process.env.AI_API_KEY?.trim()
   if (!apiKey) {
     const error = new Error('AI assistance is not configured. Please set AI_API_KEY on the server.')
@@ -70,24 +80,35 @@ async function callOpenAiCompatibleApi({ systemMessage, userMessage, fetchFn = g
     throw error
   }
 
-  const apiUrl = process.env.AI_API_URL || DEFAULT_API_URL
-  const model = process.env.AI_MODEL || DEFAULT_MODEL
+  const model = process.env.AI_MODEL?.trim() || DEFAULT_MODEL
+  const endpoint = getGeminiEndpoint(model)
 
-  const response = await fetchFn(apiUrl, {
+  const payload = {
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: userMessage }],
+      },
+    ],
+    generationConfig: {
+      temperature: 0.4,
+      maxOutputTokens: 800,
+    },
+  }
+
+  if (systemMessage) {
+    payload.systemInstruction = {
+      parts: [{ text: systemMessage }],
+    }
+  }
+
+  const response = await fetchFn(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      'x-goog-api-key': apiKey,
     },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: 'system', content: systemMessage },
-        { role: 'user', content: userMessage },
-      ],
-      temperature: 0.4,
-      max_tokens: 800,
-    }),
+    body: JSON.stringify(payload),
   })
 
   if (!response.ok) {
@@ -99,10 +120,13 @@ async function callOpenAiCompatibleApi({ systemMessage, userMessage, fetchFn = g
     throw error
   }
 
-  const data = await response.json()
-  const content = data?.choices?.[0]?.message?.content
+  const data = await response.json().catch(() => ({}))
+  const candidate = data?.candidates?.[0]
+  const content = candidate?.content?.parts?.map((p) => p.text).filter(Boolean).join('')
+
   if (!content) {
-    const error = new Error('The AI service returned an empty response.')
+    const finishReason = candidate?.finishReason
+    const error = new Error(finishReason ? `AI response stopped (${finishReason}).` : 'The AI service returned an empty response.')
     error.status = 502
     error.code = 'AI_EMPTY_RESPONSE'
     throw error
@@ -120,7 +144,7 @@ export async function generateAiHint(problem, hintLevel, { fetchFn } = {}) {
   }
 
   const { systemMessage, userMessage } = buildHintPrompt(problem, level)
-  const hintText = await callOpenAiCompatibleApi({ systemMessage, userMessage, fetchFn })
+  const hintText = await callGeminiApi({ systemMessage, userMessage, fetchFn })
   return {
     hint: hintText,
     level,
@@ -129,7 +153,7 @@ export async function generateAiHint(problem, hintLevel, { fetchFn } = {}) {
 
 export async function generateAiExplanation(problem, { fetchFn } = {}) {
   const { systemMessage, userMessage } = buildExplanationPrompt(problem)
-  const explanationText = await callOpenAiCompatibleApi({ systemMessage, userMessage, fetchFn })
+  const explanationText = await callGeminiApi({ systemMessage, userMessage, fetchFn })
   return {
     explanation: explanationText,
   }

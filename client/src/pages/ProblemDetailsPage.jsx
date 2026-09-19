@@ -281,33 +281,60 @@ function ProblemDetailsPage({ problemId, user, onBack }) {
         )}
       </div>
 
-      {/* Problem Description */}
-      <div className="detail-section-card">
+      {/* Problem Statement Card */}
+      <div className="detail-section-card problem-statement-card">
         <h3>Problem Statement</h3>
-        <p className="problem-description-text">{problem.description}</p>
-      </div>
-
-      {/* Examples */}
-      {problem.examples?.length > 0 && (
-        <div className="detail-section-card">
-          <h3>Examples</h3>
-          <div className="examples-list">
-            {problem.examples.map((example, index) => (
-              <div className="example-box" key={index}>
-                <div className="example-tag">Example {index + 1}</div>
-                <div className="example-row">
-                  <span className="example-label">Input:</span>
-                  <code>{example.input}</code>
-                </div>
-                <div className="example-row">
-                  <span className="example-label">Output:</span>
-                  <code>{example.output}</code>
-                </div>
-              </div>
+        <div className="problem-description-content">
+          {(problem.description || '')
+            .split('\n\n')
+            .filter((p) => p.trim())
+            .map((paragraph, idx) => (
+              <p className="problem-description-text" key={idx}>
+                {paragraph}
+              </p>
             ))}
-          </div>
         </div>
-      )}
+
+        {problem.examples?.length > 0 && (
+          <div className="problem-examples-section">
+            <h4 className="section-subheading">Examples</h4>
+            <div className="examples-list">
+              {problem.examples.map((example, index) => (
+                <div className="example-box" key={index}>
+                  <div className="example-tag">Example {index + 1}</div>
+                  <div className="example-row">
+                    <span className="example-label">Input:</span>
+                    <code>{example.input}</code>
+                  </div>
+                  <div className="example-row">
+                    <span className="example-label">Output:</span>
+                    <code>{example.output}</code>
+                  </div>
+                  {example.explanation && (
+                    <div className="example-row example-explanation-row">
+                      <span className="example-label">Explanation:</span>
+                      <span className="example-explanation-text">{example.explanation}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {problem.constraints?.length > 0 && (
+          <div className="problem-constraints-section">
+            <h4 className="section-subheading">Constraints</h4>
+            <ul className="constraints-list">
+              {problem.constraints.map((constraint, idx) => (
+                <li className="constraint-item" key={idx}>
+                  <code>{constraint}</code>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
       {/* Catalog Static Hints */}
       {problem.hints?.length > 0 && (

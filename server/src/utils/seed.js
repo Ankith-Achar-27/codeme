@@ -26,10 +26,16 @@ async function seedProblems() {
     await connectDatabase({ required: true })
     await removeInvalidProblemIndexes()
     await Problem.createIndexes()
-    const slugs = problems.map((problem) => problem.slug)
-    await Problem.deleteMany({ slug: { $in: slugs } })
-    const insertedProblems = await Problem.insertMany(problems)
-    console.info(`Seeded ${insertedProblems.length} CodeMe problems.`)
+    const bulkOps = problems.map((problem) => ({
+      updateOne: {
+        filter: { slug: problem.slug },
+        update: { $set: problem },
+        upsert: true,
+      },
+    }))
+    await Problem.bulkWrite(bulkOps)
+    const count = await Problem.countDocuments()
+    console.info(`Synchronized ${problems.length} CodeMe problems. Total in database: ${count}.`)
   } finally {
     await mongoose.disconnect()
   }

@@ -2,28 +2,54 @@
 
 > Your DSA practice, personalized.
 
-<p align="center">
-  <a href="https://codeme-phi.vercel.app/">
-    <strong>🚀 Try CodeMe Live</strong>
-  </a>
-</p>
+**[🚀 Try CodeMe Live](https://codeme-phi.vercel.app/)**  
+**[GitHub Repository](https://github.com/Ankith-Achar-27/codeme)**
 
-CodeMe is a personalized DSA practice platform built for the **AI for Learning Hackathon**. It analyzes a learner's solving history, topic mastery, difficulty progression, failures, and recency to recommend what they should practice next—paired with a pedagogical AI Tutor powered by Google Gemini.
+CodeMe is a personalized DSA practice platform designed to guide learners through targeted algorithmic problem solving. It analyzes a learner's attempt history and topic weaknesses to recommend the most relevant next challenge, while providing a pedagogical AI Tutor powered by Google Gemini to offer progressive hints when learners get stuck.
+
+---
+
+## 📌 Project Snapshot
+
+- **Challenge**: AI for Learning Hackathon
+- **Team**: Team Erebus
+- **Problems**: 104 curated DSA problems
+- **Live Demo**: [https://codeme-phi.vercel.app/](https://codeme-phi.vercel.app/)
+- **Repository**: [https://github.com/Ankith-Achar-27/codeme](https://github.com/Ankith-Achar-27/codeme)
+- **Frontend**: React 19 + Vite
+- **Backend**: Node.js + Express
+- **Database**: MongoDB Atlas
+- **AI Tutor**: Google Gemini (`gemini-3.6-flash`)
+- **Deployment**: Vercel + Render
 
 ---
 
 ## 🎯 The Problem & Target Audience
 
 ### The Problem
-Traditional DSA preparation platforms suffer from three core pedagogical flaws:
-1. **Aimless Grinding**: Learners waste hours picking problems at random without knowing which algorithmic patterns they are actually deficient in.
-2. **The "Spoiler Trap"**: When stuck, viewing solutions or discussion boards reveals full code implementations instantly—robbing learners of the critical struggle and "aha!" intuition needed to pass live technical interviews.
-3. **Fatigue & Asymmetric Difficulty**: Practicing problems that are either too trivial or overwhelmingly difficult leads to frustration and high drop-off rates.
+CodeMe is designed to address three core challenges in traditional DSA preparation:
+1. **Aimless Practice**: Learners often do not know what problem to practice next to systematically address their specific algorithmic weaknesses.
+2. **The "Spoiler Trap"**: When stuck, traditional platforms often guide learners directly toward full code implementations or editorials, bypassing the critical intuition-building struggle.
+3. **Difficulty Mismatch**: Inappropriate difficulty progression can cause frustration, burnout, or inefficient practice.
 
 ### Target Audience
-- **CS Students & New Graduates**: Preparing for technical interviews who need a structured, high-yield practice roadmap.
+- **CS Students & New Graduates**: Preparing for technical interviews and seeking a structured, high-yield practice roadmap.
 - **Self-Taught Developers & Bootcamp Learners**: Seeking personalized guidance without paying for expensive private tutoring.
-- **Software Engineers**: Brushing up on core algorithms efficiently with zero time wasted choosing what to solve next.
+- **Software Engineers**: Brushing up on core algorithms efficiently with minimal time spent choosing what to solve next.
+
+---
+
+## 🔄 How CodeMe Works
+
+CodeMe implements a focused, adaptive learning loop designed to guide deliberate practice:
+
+1. **Practice a DSA Problem**: Select or receive a recommended problem from the 104-problem curated catalog.
+2. **Record the Attempt**: Log your attempt outcome (Solved, Attempted, or Review Needed), time spent, and notes.
+3. **Profile Updates**: CodeMe updates your topic mastery profile, difficulty progression, and recency data.
+4. **Candidate Scoring**: The recommendation engine scores candidate problems across topic weakness, difficulty fit, failure relevance, concept overlap, and recency.
+5. **Personalized Recommendation**: CodeMe serves the next challenge with an explainable rationale explaining why it was selected.
+6. **Progressive AI Tutoring**: When stuck, the AI Tutor provides 3 tiers of pedagogical hints without dumping full solutions.
+7. **Analytics & Reflection**: Inspect topic mastery, practice streaks, and weakness areas to track ongoing growth.
 
 ---
 
@@ -39,7 +65,7 @@ Traditional DSA preparation platforms suffer from three core pedagogical flaws:
   - **Hint 1 · Concept**: Small conceptual nudge to inspire algorithmic thinking. Never dumps code or algorithms.
   - **Hint 2 · Strategy**: Directional algorithmic approach and high-level strategy.
   - **Hint 3 · Implementation**: Concrete structural guidance, data structures, and edge cases without providing full copy-paste solutions.
-- **Quota-Optimized Architecture**: A single Gemini generation request generates all 3 progressive hints as structured JSON. Hints 2 and 3 are revealed instantly from memory with **zero additional API requests**.
+- **Quota-Optimized Architecture**: A single Gemini generation request returns all 3 progressive hints as structured JSON. Hints 2 and 3 are revealed locally in-memory with zero additional API requests.
 - **Request Deduplication & 15s Cooldown**: Prevents double-clicks and accidental quota exhaustion with a subtle cooldown indicator.
 - **Deep Solution Breakdown**: On-demand post-attempt algorithmic explanations detailing time/space complexity and core principles.
 - **Math & Notation Pipeline**: Custom rendering protects LaTeX formulas, Big-O notation, and code snippets while keeping currency signs and symbols clean.
@@ -52,6 +78,28 @@ Traditional DSA preparation platforms suffer from three core pedagogical flaws:
 ### 4. 📚 Curated Problem Catalog
 - **104 curated DSA problems** with problem-specific descriptions, input/output examples with explanations, constraints, topic tags, and static hints.
 - Real-time search, difficulty filters, and topic chips.
+
+---
+
+## 📸 Screenshots
+
+Visual walkthrough of CodeMe's core user flows captured directly from the live application:
+
+### Dashboard
+![CodeMe Dashboard](assets/screenshots/dashboard.png)
+*Personalized progress overview and current practice recommendation.*
+
+### Recommendation Engine
+![CodeMe Recommendation Engine](assets/screenshots/recommendation.png)
+*Explainable recommendation with target topic tags, match score, and personalized rationale.*
+
+### Problem Details & AI Tutor
+![CodeMe Problem Details and AI Tutor](assets/screenshots/problem-details-ai-tutor.png)
+*Full DSA problem view showing the pedagogical AI Learning Assistant with a successful Google Gemini Hint 1 response (captured during live verification).*
+
+### Analytics & Topic Mastery
+![CodeMe Analytics](assets/screenshots/analytics.png)
+*Topic mastery breakdown, focus area alerts, performance trends, and practice consistency.*
 
 ---
 
@@ -76,6 +124,8 @@ Traditional DSA preparation platforms suffer from three core pedagogical flaws:
 │ Practice Data│   │(Quota-Optimized AI Tutor) │
 └──────────────┘   └───────────────────────────┘
 ```
+
+The system separates concerns between a reactive client SPA, a stateless Express API, a managed MongoDB document store, and Google Gemini for on-demand tutoring.
 
 ### Live Deployment
 
@@ -189,9 +239,9 @@ npm run dev
 
 ## 🛡️ Evidence of Quality & Reliability
 
-CodeMe is engineered with strict reliability, deterministic behavior, and resilience guarantees across both frontend and backend systems.
+CodeMe is engineered with reliability, deterministic behavior, and resilience guarantees across both frontend and backend systems.
 
-### 1. Automated Test Suites
+### Automated Testing
 - **Backend Services (30/30 passing)**: Verifies deterministic recommendation scoring, failure recovery logic, topic mastery aggregations, strict Gemini JSON schema parsing, graceful API error handling, and catalog integrity:
   ```bash
   cd server
@@ -207,32 +257,22 @@ CodeMe is engineered with strict reliability, deterministic behavior, and resili
   ```
 - **Code Quality**: Zero lint warnings or errors under Oxlint and successful production builds.
 
-### 2. Error States & Quota Resilience
+### Error States & Resilience
 - **Zero-Extra-API Hint Progression**: A single Gemini generation request returns all 3 progressive hints at once. Tiers 2 and 3 are revealed instantly in-memory, reducing latency, API requests, and quota consumption.
 - **Debounce & 15-Second Cooldown**: Prevents rapid multi-clicking and protects free-tier API quotas with visual cooldown timers and disabled button states.
 - **Graceful Degradation**: If the Gemini API is unreachable or returns a 502/503 status, CodeMe catches the exception gracefully, informs the learner clearly, and seamlessly provides curated static problem hints so practice is never interrupted.
-- **Notation & Math Protection**: Custom sanitization prevents raw LaTeX or Big-O notation (`O(N log N)`) from breaking markdown parsers or producing ugly formatting artifacts.
+- **Notation & Math Protection**: Custom sanitization prevents raw LaTeX or Big-O notation (`O(N log N)`) from breaking markdown parsers or producing formatting artifacts.
 
-### 3. Basic Security & Environment Isolation
+### Security
 - **Credential Protection**: No secrets or API keys are committed to source control. Environment files are excluded through `.gitignore`, with clean `.env.example` templates provided.
 - **Backend Isolation**: Gemini API keys reside exclusively on the Render backend service; the client SPA has zero access to private provider tokens.
-- **CORS Whitelist**: Strict CORS middleware configured to accept requests only from the verified client origin.
+- **CORS Restriction**: Strict CORS middleware configured to accept requests only from the verified client origin.
 - **Input Sanitization**: Problem and attempt IDs are validated against MongoDB ObjectId patterns before querying to prevent query injection.
 
-### 4. Accessibility & User Experience
+### Accessibility & UX
 - High-contrast dark-mode interface designed for readable text and clear visual hierarchy.
 - Fully responsive layout adapting across mobile, tablet, and desktop viewports.
 - Clear visual focus states, micro-animations, and accessible loading states across all asynchronous interactions.
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React 19, Vite, Vanilla CSS Design System, Oxlint
-- **Backend**: Node.js, Express, Mongoose, Native Node Test Runner
-- **Database**: MongoDB / MongoDB Atlas
-- **AI Engine**: Google Gemini API (`gemini-3.6-flash`)
-- **Hosting**: Vercel (Frontend), Render (Backend API), MongoDB Atlas (Database)
 
 ---
 
@@ -266,9 +306,55 @@ AI tools were used during the development of CodeMe to assist with implementatio
 
 ### Verification
 
-AI-generated code and suggestions were reviewed and tested by the team. We personally verified core application flows including problem browsing, problem details, attempt recording, personalized recommendations, analytics, AI Tutor behavior, database persistence, deployment connectivity, error handling, and production builds.
+AI-assisted code and suggestions were reviewed and tested by the team. We personally verified core application flows including problem browsing, problem details, attempt recording, personalized recommendations, analytics, AI Tutor behavior, database persistence, deployment connectivity, error handling, and production builds.
 
 Automated validation included backend tests, frontend linting, production builds, and validation of the complete 104-problem catalog.
+
+---
+
+## ⏱️ Two-Minute Demo Flow
+
+A recommended structure for evaluating or demonstrating CodeMe in two minutes:
+
+### 0:00–0:20 — Problem
+- Explain the core DSA practice dilemma: learners often do not know what to practice next to address weaknesses, and getting stuck often leads directly to full solutions that spoil the learning process.
+
+### 0:20–0:40 — CodeMe Overview
+- Introduce CodeMe as a personalized DSA practice platform combining adaptive problem recommendations with a pedagogical AI Tutor powered by Google Gemini.
+
+### 0:40–1:10 — Core Workflow
+- Demonstrate the live flow on [codeme-phi.vercel.app](https://codeme-phi.vercel.app/):
+  1. Review the **Dashboard** overview and current recommendation.
+  2. Navigate to **Recommendation** to inspect the explainable rationale.
+  3. Open a **Problem** to view description, examples with explanations, and constraints.
+  4. Record an **Attempt** (e.g., Solved or Needs Review) and observe the recommendation adapt.
+
+### 1:10–1:30 — Explainability & Analytics
+- Show the **Analytics** page:
+  - Topic mastery breakdown across algorithmic categories.
+  - Weakness identification and how it feeds into future candidate scoring.
+  - Practice streaks, completion rates, and problem history.
+
+### 1:30–1:50 — AI Tutor Demonstration
+- Open a challenging problem and click **Get Hints**:
+  - Show **Hint 1 · Concept** (conceptual nudge, no code dump).
+  - Reveal **Hint 2 · Strategy** and **Hint 3 · Implementation** locally from memory without additional API calls.
+  - Highlight the 15-second cooldown and request deduplication protecting API quota.
+
+### 1:50–2:00 — Technical Decision & Wrap-Up
+- Summarize architecture and engineering rigor:
+  - React 19/Vite SPA on Vercel connecting to Node.js/Express API on Render, MongoDB Atlas, and Gemini.
+  - 104 curated problems, 30/30 backend tests, 16/16 frontend tests, deterministic scoring, and deployed live.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 19, Vite, Vanilla CSS Design System, Oxlint
+- **Backend**: Node.js, Express, Mongoose, Native Node Test Runner
+- **Database**: MongoDB / MongoDB Atlas
+- **AI Engine**: Google Gemini API (`gemini-3.6-flash`)
+- **Hosting**: Vercel (Frontend), Render (Backend API), MongoDB Atlas (Database)
 
 ---
 

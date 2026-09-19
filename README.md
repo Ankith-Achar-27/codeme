@@ -12,6 +12,21 @@ CodeMe is a personalized DSA practice platform built for the **AI for Learning H
 
 ---
 
+## 🎯 The Problem & Target Audience
+
+### The Problem
+Traditional DSA preparation platforms suffer from three core pedagogical flaws:
+1. **Aimless Grinding**: Learners waste hours picking problems at random without knowing which algorithmic patterns they are actually deficient in.
+2. **The "Spoiler Trap"**: When stuck, viewing solutions or discussion boards reveals full code implementations instantly—robbing learners of the critical struggle and "aha!" intuition needed to pass live technical interviews.
+3. **Fatigue & Asymmetric Difficulty**: Practicing problems that are either too trivial or overwhelmingly difficult leads to frustration and high drop-off rates.
+
+### Target Audience
+- **CS Students & New Graduates**: Preparing for technical interviews who need a structured, high-yield practice roadmap.
+- **Self-Taught Developers & Bootcamp Learners**: Seeking personalized guidance without paying for expensive private tutoring.
+- **Software Engineers**: Brushing up on core algorithms efficiently with zero time wasted choosing what to solve next.
+
+---
+
 ## 🌟 Key Features
 
 ### 1. 🎯 Personalized Recommendation Engine
@@ -172,27 +187,42 @@ npm run dev
 
 ---
 
-## 🧪 Testing & Validation
+## 🛡️ Evidence of Quality & Reliability
 
-CodeMe includes automated test suites covering both frontend state management and backend services.
+CodeMe is engineered with strict reliability, deterministic behavior, and resilience guarantees across both frontend and backend systems.
 
-### Backend Tests
-Verifies recommendation determinism, analytics calculations, Gemini prompt structure, strict JSON parsing, and 502/503 error handling:
-```bash
-cd server
-npm test
-```
-*Result: 28/28 tests passing.*
+### 1. Automated Test Suites
+- **Backend Services (28/28 passing)**: Verifies deterministic recommendation scoring, failure recovery logic, topic mastery aggregations, strict Gemini JSON schema parsing, and graceful 502/503 network error handling:
+  ```bash
+  cd server
+  npm test
+  ```
+- **Catalog Integrity (104/104 problems verified)**: Automated validation tests ensuring every problem contains valid descriptions, input/output test cases, difficulty classifications, topic tags, and static hints without missing schema fields.
+- **Frontend State & Parsers (16/16 passing)**: Verifies LaTeX and math notation sanitization, bold/code token protection, single-request hint progression, local state transitions, double-click deduplication, and cooldown timer enforcement:
+  ```bash
+  cd client
+  node --test test/*.test.js
+  npm run lint
+  npm run build
+  ```
+- **Code Quality**: Zero lint warnings or errors under Oxlint and successful production builds.
 
-### Frontend Tests, Linting & Build
-Verifies LaTeX/Markdown notation sanitization, bold/code preservation, single-request hint progression, local hint reveals, double-click deduplication, and cooldown timer:
-```bash
-cd client
-node --test test/*.test.js
-npm run lint
-npm run build
-```
-*Result: 16/16 tests passing, 0 lint warnings/errors, production build successful.*
+### 2. Error States & Quota Resilience
+- **Zero-Extra-API Hint Progression**: A single Gemini generation request returns all 3 progressive hints at once. Tiers 2 and 3 are revealed instantly in-memory—eliminating latency, rate-limit triggers, and extra cost.
+- **Debounce & 15-Second Cooldown**: Prevents rapid multi-clicking and protects free-tier API quotas with visual cooldown timers and disabled button states.
+- **Graceful Degradation**: If the Gemini API is unreachable or returns a 502/503 status, CodeMe catches the exception gracefully, informs the learner clearly, and seamlessly provides curated static problem hints so practice is never interrupted.
+- **Notation & Math Protection**: Custom sanitization prevents raw LaTeX or Big-O notation (`O(N log N)`) from breaking markdown parsers or producing ugly formatting artifacts.
+
+### 3. Basic Security & Environment Isolation
+- **Credential Protection**: Zero secrets or API keys are committed to source control (strictly enforced via `.gitignore` with only clean `.env.example` templates provided).
+- **Backend Isolation**: Gemini API keys reside exclusively on the Render backend service; the client SPA has zero access to private provider tokens.
+- **CORS Whitelist**: Strict CORS middleware configured to accept requests only from the verified client origin.
+- **Input Sanitization**: Problem and attempt IDs are validated against MongoDB ObjectId patterns before querying to prevent query injection.
+
+### 4. Accessibility & User Experience
+- High-contrast, dark-mode optimized color palette adhering to WCAG readability standards.
+- Fully responsive layout adapting across mobile, tablet, and desktop viewports.
+- Clear visual focus states, micro-animations, and accessible loading states across all asynchronous interactions.
 
 ---
 
@@ -203,6 +233,24 @@ npm run build
 - **Database**: MongoDB / MongoDB Atlas
 - **AI Engine**: Google Gemini API (`gemini-3.6-flash`)
 - **Hosting**: Vercel (Frontend), Render (Backend API), MongoDB Atlas (Database)
+
+---
+
+## ⚠️ Known Limitations
+
+- **External Code Execution**: CodeMe currently focuses on algorithmic problem solving, recommendation, and AI tutoring. Learners execute their code in their preferred local editor or runtime, logging their attempt outcome. In-browser sandboxed execution is prioritized on the upcoming roadmap.
+- **Single-Learner Session**: The current build uses a dedicated local learner profile rather than multi-tenant OAuth, keeping onboarding instantaneous with zero friction during hackathon evaluation.
+- **Catalog Scope**: The catalog is currently curated to 104 high-frequency DSA problems spanning core patterns (Two Pointers, Sliding Window, Trees, Graphs, DP, etc.).
+
+---
+
+## 🗺️ Product Roadmap
+
+- [ ] **In-Browser Monaco Code Editor**: Embedded editor with Web Worker / WebAssembly execution for instant in-browser test running in JavaScript, Python, and C++.
+- [ ] **Multi-Tenant Authentication**: Sign in with GitHub or Google with cloud sync across devices.
+- [ ] **Spaced Repetition Review System**: SuperMemo (SM-2) scheduling to periodically resurface previously failed or fragile problems at optimal retention intervals.
+- [ ] **Mock Interview Simulator**: Real-time timed interview mode with simulated interviewer follow-up questions powered by Gemini.
+- [ ] **Community & Leaderboards**: Track practice streaks and peer problem-solving progress.
 
 ---
 

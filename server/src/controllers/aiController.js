@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import Problem from '../models/Problem.js'
-import { generateAiExplanation, generateAiHint } from '../services/aiService.js'
+import { generateAiExplanation, generateAiHints } from '../services/aiService.js'
 
 function databaseIsUnavailable(response) {
   if (mongoose.connection.readyState === 1) return false
@@ -20,9 +20,11 @@ export async function getHint(request, response, next) {
       return response.status(400).json({ success: false, message: 'Provide a valid problem ID.' })
     }
 
-    const level = Number.parseInt(hintLevel, 10)
-    if (![1, 2, 3].includes(level)) {
-      return response.status(400).json({ success: false, message: 'hintLevel must be an integer between 1 and 3.' })
+    if (hintLevel !== undefined && hintLevel !== null) {
+      const level = Number.parseInt(hintLevel, 10)
+      if (![1, 2, 3].includes(level)) {
+        return response.status(400).json({ success: false, message: 'hintLevel must be an integer between 1 and 3.' })
+      }
     }
 
     if (databaseIsUnavailable(response)) return undefined
@@ -32,7 +34,7 @@ export async function getHint(request, response, next) {
       return response.status(404).json({ success: false, message: 'Problem not found.' })
     }
 
-    const result = await generateAiHint(problem, level)
+    const result = await generateAiHints(problem)
     return response.json({ success: true, data: result })
   } catch (error) {
     if (error.status === 503 || error.status === 502 || error.status === 400) {

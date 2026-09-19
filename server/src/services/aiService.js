@@ -6,6 +6,44 @@ export function isAiConfigured() {
   return Boolean(process.env.AI_API_KEY && process.env.AI_API_KEY.trim())
 }
 
+export function buildAllHintsPrompt(problem) {
+  const systemMessage = `You are a patient DSA tutor, not a solution generator.
+Your job is to generate three progressive hints that guide the learner step-by-step through solving the problem without revealing the complete solution.
+
+Hint Progression Rules:
+- Hint 1 (Conceptual Nudge): Give only a small conceptual clue or ask a thoughtful guiding question to prompt their intuition about the relevant pattern or idea. Do NOT name the complete algorithm. Do NOT provide implementation details, code, or pseudocode.
+- Hint 2 (Strategy Guidance): Provide a stronger directional strategy. Explain what state, property, or data structure to keep track of, but do not provide a full algorithm. No complete code or pseudocode.
+- Hint 3 (Implementation Direction): Provide implementation-level guidance (key steps, transformations, or data structure mechanics). Do NOT provide complete executable code. Do NOT dump the final algorithm.
+
+Pedagogical Rules:
+- Never reveal the complete solution.
+- Never provide complete executable code.
+- Do not repeat the problem statement.
+- Keep each hint concise (one or two short paragraphs or a few bullet points).
+- Do not use markdown heading syntax (# or ##) inside hints.
+- Do not output LaTeX ($ or $$). Use readable notation such as k, target, nums[i], O(n), etc.
+- Do not include introductory preamble, filler, or closing pleasantries (e.g. do NOT say "Here are your hints").
+- You MUST respond with a single, valid JSON object containing exactly three string keys: "hint1", "hint2", and "hint3".
+
+Expected JSON format:
+{
+  "hint1": "Conceptual hint text...",
+  "hint2": "Strategy hint text...",
+  "hint3": "Implementation direction hint text..."
+}`
+
+  const userMessage = `Problem Title: ${problem.title || 'Unknown'}
+Difficulty: ${problem.difficulty || 'Unspecified'}
+Topics: ${(problem.topics || []).join(', ')}
+Concepts: ${(problem.concepts || []).join(', ')}
+Description: ${problem.description || ''}
+Examples: ${(problem.examples || []).map((ex) => `Input: ${ex.input} -> Output: ${ex.output}`).join('; ')}
+
+Generate all three progressive hints as strict JSON with keys "hint1", "hint2", and "hint3".`
+
+  return { systemMessage, userMessage }
+}
+
 export function buildHintPrompt(problem, hintLevel) {
   const levelInstructions = {
     1: `Provide Level 1 Hint (Conceptual Direction) - Conceptual Nudge:
@@ -206,7 +244,62 @@ async function callGeminiApi({ systemMessage, userMessage, fetchFn = globalThis.
   return content.trim()
 }
 
-export async function generateAiHint(problem, hintLevel, { fetchFn } = {}) {
+export function parseAiHintsResponse(rawText) {
+  if (!rawText || typeof rawText !== 'string') {
+    const error = new Error('The AI service returned an empty response.')
+    error.status = 502
+    error.code = 'AI_EMPTY_RESPONSE'
+    throw error
+  }
+
+  let text = rawText.trim()
+
+  // 1. Strip markdown code fences if wrapped in ```json ... ``` or ``` ... ```
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+  }
+
+  // 2. Locate the outermost JSON object if there is preamble or suffix text
+  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  if (jsonMatch) {
+    text = jsonMatch[0]
+  }
+
+  let parsed
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    const error = new Error('The AI service returned an invalid response format.')
+    error.status = 502
+    error.code = 'AI_INVALID_FORMAT'
+    throw error
+  }
+
+  const hint1 = parsed.hint1 || parsed.hint_1 || parsed['Hint 1']
+  const hint2 = parsed.hint2 || parsed.hint_2 || parsed['Hint 2']
+  const hint3 = parsed.hint3 || parsed.hint_3 || parsed['Hint 3']
+
+  if (!hint1 || !hint2 || !hint3 || typeof hint1 !== 'string' || typeof hint2 !== 'string' || typeof hint3 !== 'string') {
+    const error = new Error('The AI service response was incomplete.')
+    error.status = 502
+    error.code = 'AI_INCOMPLETE_RESPONSE'
+    throw error
+  }
+
+  return {
+    hint1: normalizeHintText(hint1),
+    hint2: normalizeHintText(hint2),
+    hint3: normalizeHintText(hint3),
+  }
+}
+
+export async function generateAiHints(problem, { fetchFn } = {}) {
+  const { systemMessage, userMessage } = buildAllHintsPrompt(problem)
+  const rawText = await callGeminiApi({ systemMessage, userMessage, fetchFn })
+  return parseAiHintsResponse(rawText)
+}
+
+export async function generateAiHint(problem, hintLevel = 1, { fetchFn } = {}) {
   const level = Number.parseInt(hintLevel, 10)
   if (![1, 2, 3].includes(level)) {
     const error = new Error('hintLevel must be an integer between 1 and 3.')
@@ -214,11 +307,10 @@ export async function generateAiHint(problem, hintLevel, { fetchFn } = {}) {
     throw error
   }
 
-  const { systemMessage, userMessage } = buildHintPrompt(problem, level)
-  const rawText = await callGeminiApi({ systemMessage, userMessage, fetchFn })
-  const hintText = normalizeHintText(rawText)
+  const hints = await generateAiHints(problem, { fetchFn })
   return {
-    hint: hintText,
+    ...hints,
+    hint: hints[`hint${level}`],
     level,
   }
 }

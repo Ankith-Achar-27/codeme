@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { api } from '../services/api.js'
 import { AiMarkdown } from '../components/AiMarkdown.js'
 
@@ -15,8 +15,11 @@ const HINT_TIERS = [
   { level: 3, name: 'Implementation', label: 'HINT 3 · IMPLEMENTATION' },
 ]
 
-function getTutorActionLabel(count) {
-  if (count === 0) return 'Get Hint 1 →'
+function getTutorActionLabel(count, cooldownRemaining = 0) {
+  if (count === 0) {
+    if (cooldownRemaining > 0) return `Get Hint 1 → (${cooldownRemaining}s)`
+    return 'Get Hint 1 →'
+  }
   if (count === 1) return 'Reveal Hint 2 →'
   if (count === 2) return 'Reveal Hint 3 →'
   return 'All hints revealed'
@@ -69,16 +72,45 @@ function ProblemDetailsPage({ problemId, user, onBack }) {
   const [submitting, setSubmitting] = useState(false)
   const [confirmation, setConfirmation] = useState('')
 
-  // AI Learning Assistant state
+  // AI Learning Assistant state (Single request for Hint 1 + 2 + 3 with local reveals)
   const [aiHints, setAiHints] = useState([])
+  const [storedHints, setStoredHints] = useState(null)
+  const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const [aiHintLoading, setAiHintLoading] = useState(false)
   const [aiHintError, setAiHintError] = useState(null)
   const [aiExplanation, setAiExplanation] = useState(null)
   const [aiExplanationLoading, setAiExplanationLoading] = useState(false)
   const [aiExplanationError, setAiExplanationError] = useState(null)
   const [hasAttempted, setHasAttempted] = useState(false)
+  const isRequestingRef = useRef(false)
+  const [prevProblemId, setPrevProblemId] = useState(problemId)
+  if (problemId !== prevProblemId) {
+    setPrevProblemId(problemId)
+    setVisibleHints(0)
+    setAiHints([])
+    setStoredHints(null)
+    setCooldownRemaining(0)
+    setAiHintLoading(false)
+    setAiHintError(null)
+    setAiExplanation(null)
+    setAiExplanationLoading(false)
+    setAiExplanationError(null)
+    setHasAttempted(false)
+    setConfirmation('')
+  }
 
+  // 15-second generation cooldown timer
   useEffect(() => {
+    if (cooldownRemaining <= 0) return
+    const timer = setInterval(() => {
+      setCooldownRemaining((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [cooldownRemaining])
+
+  // Load problem on problem change
+  useEffect(() => {
+    isRequestingRef.current = false
     let active = true
     api.getProblem(problemId)
       .then((result) => active && setProblem(result.data))
@@ -92,17 +124,44 @@ function ProblemDetailsPage({ problemId, user, onBack }) {
 
   async function requestAiHint() {
     if (nextHintLevel > 3 || aiHintLoading) return
+
+    // If hints 1-3 were already fetched in this session, reveal next level locally (0 API requests)
+    if (storedHints) {
+      if (aiHints.length === 1 && storedHints.hint2) {
+        setAiHints((prev) => [...prev, { level: 2, hint: storedHints.hint2 }])
+        setStatus((current) => (current === 'solved' ? 'solved_with_hint' : current))
+        return
+      }
+      if (aiHints.length === 2 && storedHints.hint3) {
+        setAiHints((prev) => [...prev, { level: 3, hint: storedHints.hint3 }])
+        setStatus((current) => (current === 'solved' ? 'solved_with_hint' : current))
+        return
+      }
+    }
+
+    // Single Gemini generation request: lock deduplication and check cooldown
+    if (isRequestingRef.current || cooldownRemaining > 0) return
+
+    isRequestingRef.current = true
     setAiHintLoading(true)
     setAiHintError(null)
+    setCooldownRemaining(15)
 
     try {
-      const response = await api.getAiHint(problemId, nextHintLevel)
-      setAiHints((prev) => [...prev, response.data])
+      const response = await api.getAiHint(problemId)
+      const data = response?.data
+      if (!data || !data.hint1 || !data.hint2 || !data.hint3) {
+        throw new Error('AI response missing required hints')
+      }
+      setStoredHints(data)
+      setAiHints([{ level: 1, hint: data.hint1 }])
       setStatus((current) => (current === 'solved' ? 'solved_with_hint' : current))
     } catch (err) {
+      setStoredHints(null)
       setAiHintError(formatAiError(err))
     } finally {
       setAiHintLoading(false)
+      isRequestingRef.current = false
     }
   }
 
@@ -303,9 +362,10 @@ function ProblemDetailsPage({ problemId, user, onBack }) {
             <button
               className="button secondary-outline small compact-error-retry-btn"
               onClick={requestAiHint}
+              disabled={aiHintLoading || cooldownRemaining > 0}
               type="button"
             >
-              Retry
+              {cooldownRemaining > 0 ? `Retry in ${cooldownRemaining}s` : 'Retry'}
             </button>
           </div>
         )}
@@ -378,7 +438,7 @@ function ProblemDetailsPage({ problemId, user, onBack }) {
           {nextHintLevel <= 3 ? (
             <button
               className="button primary ai-tutor-cta"
-              disabled={aiHintLoading}
+              disabled={aiHintLoading || (aiHints.length === 0 && cooldownRemaining > 0)}
               onClick={requestAiHint}
               type="button"
             >
@@ -388,7 +448,7 @@ function ProblemDetailsPage({ problemId, user, onBack }) {
                   <span>Consulting AI Tutor…</span>
                 </>
               ) : (
-                <span>{getTutorActionLabel(aiHints.length)}</span>
+                <span>{getTutorActionLabel(aiHints.length, cooldownRemaining)}</span>
               )}
             </button>
           ) : (

@@ -54,7 +54,7 @@ function App() {
           <button className="brand" onClick={openDashboard} aria-label="CodeMe Home">
             <img src={logoUrl} alt="CodeMe" className="brand-logo" />
           </button>
-          <span className="brand-tagline">“Your DSA practice, personalized.”</span>
+          <span className="brand-tagline">Your DSA practice, personalized.</span>
         </div>
 
         <nav className="site-nav" aria-label="Main Navigation">
@@ -130,7 +130,7 @@ function App() {
         <div className="footer-content">
           <div className="footer-brand">
             <img src={logoUrl} alt="CodeMe" className="footer-logo" />
-            <p className="footer-tagline">“Your DSA practice, personalized.”</p>
+            <p className="footer-tagline">Your DSA practice, personalized.</p>
           </div>
           <p className="footer-note">
             AI for Learning Hackathon · Personalized DSA Mastery & AI Tutoring

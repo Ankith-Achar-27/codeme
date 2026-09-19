@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  buildAllHintsPrompt,
   buildExplanationPrompt,
   buildHintPrompt,
   generateAiExplanation,
   generateAiHint,
+  generateAiHints,
   isAiConfigured,
   normalizeHintText,
+  parseAiHintsResponse,
 } from '../src/services/aiService.js'
 import { formatAiText } from '../../client/src/utils/formatAiText.js'
 
@@ -71,7 +74,13 @@ test('1. Hint request with valid problem calls Gemini endpoint with x-goog-api-k
           candidates: [
             {
               content: {
-                parts: [{ text: 'Think about how looking up values in a hash map can help find complements.' }],
+                parts: [{
+                  text: JSON.stringify({
+                    hint1: 'Think about how looking up values in a hash map can help find complements.',
+                    hint2: 'Consider storing each number in a dictionary as you visit it.',
+                    hint3: 'Check if target - nums[i] exists in your dictionary on each step.',
+                  }),
+                }],
               },
               finishReason: 'STOP',
             },
@@ -84,6 +93,9 @@ test('1. Hint request with valid problem calls Gemini endpoint with x-goog-api-k
 
     assert.equal(result.level, 1)
     assert.match(result.hint, /hash map/i)
+    assert.ok(result.hint1)
+    assert.ok(result.hint2)
+    assert.ok(result.hint3)
     assert.match(interceptedUrl, /generativelanguage\.googleapis\.com/)
     assert.match(interceptedUrl, /gemini-3\.6-flash:generateContent/)
     assert.equal(interceptedHeaders['x-goog-api-key'], 'test-gemini-key')
@@ -109,7 +121,13 @@ test('2. Hint levels 1 -> 2 -> 3 construct progressively specific pedagogical pr
   try {
     process.env.AI_API_KEY = 'test-key-123'
     for (const lvl of [1, 2, 3]) {
-      const mockFetch = createMockFetch({ content: `Guidance for level ${lvl}` })
+      const mockFetch = createMockFetch({
+        content: JSON.stringify({
+          hint1: 'Guidance for level 1',
+          hint2: 'Guidance for level 2',
+          hint3: 'Guidance for level 3',
+        }),
+      })
       const res = await generateAiHint(mockProblem, lvl, { fetchFn: mockFetch })
       assert.equal(res.level, lvl)
       assert.equal(res.hint, `Guidance for level ${lvl}`)
@@ -285,4 +303,90 @@ test('13. formatAiText normalizes LaTeX, Markdown headings, and bold emphasis wh
     assert.equal(formatAiText(tc.in), tc.out)
   }
 })
+
+test('14. parseAiHintsResponse parses valid JSON into hint1, hint2, and hint3', () => {
+  const json = JSON.stringify({
+    hint1: 'Consider tracking complements.',
+    hint2: 'Use a hash map to remember previous elements.',
+    hint3: 'Check if target - nums[i] is already in the map.',
+  })
+  const parsed = parseAiHintsResponse(json)
+  assert.equal(parsed.hint1, 'Consider tracking complements.')
+  assert.equal(parsed.hint2, 'Use a hash map to remember previous elements.')
+  assert.equal(parsed.hint3, 'Check if target - nums[i] is already in the map.')
+})
+
+test('15. parseAiHintsResponse handles markdown code fences and surrounding text', () => {
+  const fenced = `Here are the hints:
+\`\`\`json
+{
+  "hint1": "Hint 1 text",
+  "hint2": "Hint 2 text",
+  "hint3": "Hint 3 text"
+}
+\`\`\`
+Good luck!`
+  const parsed = parseAiHintsResponse(fenced)
+  assert.equal(parsed.hint1, 'Hint 1 text')
+  assert.equal(parsed.hint2, 'Hint 2 text')
+  assert.equal(parsed.hint3, 'Hint 3 text')
+})
+
+test('16. parseAiHintsResponse throws 502 error when hints are incomplete or missing fields', () => {
+  const incomplete = JSON.stringify({ hint1: 'Only hint 1' })
+  assert.throws(
+    () => parseAiHintsResponse(incomplete),
+    (err) => err.status === 502 && /incomplete/i.test(err.message),
+  )
+})
+
+test('17. parseAiHintsResponse throws 502 error when JSON is invalid or unparseable', () => {
+  assert.throws(
+    () => parseAiHintsResponse('Not a valid JSON object'),
+    (err) => err.status === 502 && /invalid response format/i.test(err.message),
+  )
+  assert.throws(
+    () => parseAiHintsResponse(''),
+    (err) => err.status === 502 && /empty response/i.test(err.message),
+  )
+})
+
+test('18. generateAiHints makes ONE request to Gemini and returns all three progressive hints', async () => {
+  const originalKey = process.env.AI_API_KEY
+  try {
+    process.env.AI_API_KEY = 'test-key-hints'
+    let requestCount = 0
+    const mockFetch = async () => {
+      requestCount++
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [{
+                  text: JSON.stringify({
+                    hint1: 'Nudge: look for complements.',
+                    hint2: 'Strategy: hash map lookup.',
+                    hint3: 'Implementation: check target - nums[i].',
+                  }),
+                }],
+              },
+            },
+          ],
+        }),
+      }
+    }
+
+    const hints = await generateAiHints(mockProblem, { fetchFn: mockFetch })
+    assert.equal(requestCount, 1)
+    assert.equal(hints.hint1, 'Nudge: look for complements.')
+    assert.equal(hints.hint2, 'Strategy: hash map lookup.')
+    assert.equal(hints.hint3, 'Implementation: check target - nums[i].')
+  } finally {
+    process.env.AI_API_KEY = originalKey
+  }
+})
+
 

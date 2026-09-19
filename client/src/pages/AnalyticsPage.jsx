@@ -176,14 +176,14 @@ function AnalyticsPage({ user, onLibrary, onRecommendation }) {
             <div className="progress-fill success-fill" style={{ width: `${Math.min(100, overview.overallSuccessRate)}%` }} />
           </div>
           <p className="kpi-subtext">
-            {overview.statusDistribution.solved} clean · {overview.statusDistribution.solved_with_hint} with hints · {overview.statusDistribution.failed} struggles
+            {overview.statusDistribution.solved} successful · {overview.statusDistribution.failed} struggled · {overview.statusDistribution.solved_with_hint} with hints
           </p>
         </article>
 
         <article className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">Time Invested</span>
-            <span className="kpi-pill">avg {overview.averageTimePerAttempt} min/problem</span>
+            <span className="kpi-pill">Avg. {overview.averageTimePerAttempt} min/problem</span>
           </div>
           <strong className="kpi-value">
             {formatMinutes(overview.totalTimeSpent)}
@@ -199,16 +199,16 @@ function AnalyticsPage({ user, onLibrary, onRecommendation }) {
         <article className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">Practice Consistency</span>
-            <span className="kpi-pill">{overview.streak.currentStreak} day streak</span>
+            <span className="kpi-pill">{overview.streak.currentStreak} {overview.streak.currentStreak === 1 ? 'day' : 'days'} streak</span>
           </div>
           <strong className="kpi-value">
-            {overview.streak.currentStreak} <small>days active</small>
+            {overview.streak.currentStreak} <small>{overview.streak.currentStreak === 1 ? 'day active' : 'days active'}</small>
           </strong>
           <div className="progress-track">
             <div className="progress-fill streak-fill" style={{ width: `${Math.min(100, (overview.streak.currentStreak / 7) * 100)}%` }} />
           </div>
           <p className="kpi-subtext">
-            Longest streak: {overview.streak.longestStreak} days · {overview.streak.activeDaysCount} active days
+            Longest streak: {overview.streak.longestStreak} {overview.streak.longestStreak === 1 ? 'day' : 'days'} · {overview.streak.activeDaysCount} {overview.streak.activeDaysCount === 1 ? 'active day' : 'active days'}
           </p>
         </article>
       </div>

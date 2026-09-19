@@ -29,7 +29,7 @@ export const api = {
   getProblem: (id) => request(`/problems/${id}`),
   getAttempts: (userId, params = {}) => request(`/attempts/${userId}?${new URLSearchParams(params)}`),
   createAttempt: (attempt) => request('/attempts', { method: 'POST', body: JSON.stringify(attempt) }),
-  getAiHint: (problemId, hintLevel) => request('/ai/hint', { method: 'POST', body: JSON.stringify({ problemId, hintLevel }) }),
+  getAiHint: (problemId, hintLevel) => request('/ai/hint', { method: 'POST', body: JSON.stringify({ problemId, ...(hintLevel ? { hintLevel } : {}) }) }),
   getAiExplanation: (problemId) => request('/ai/explain', { method: 'POST', body: JSON.stringify({ problemId }) }),
 }
 

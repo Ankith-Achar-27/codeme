@@ -311,42 +311,6 @@ Automated validation included backend tests, frontend linting, production builds
 
 ---
 
-## ⏱️ Two-Minute Demo Flow
-
-A recommended structure for evaluating or demonstrating CodeMe in two minutes:
-
-### 0:00–0:20 — Problem
-- Explain the core DSA practice dilemma: learners often do not know what to practice next to address weaknesses, and getting stuck often leads directly to full solutions that spoil the learning process.
-
-### 0:20–0:40 — CodeMe Overview
-- Introduce CodeMe as a personalized DSA practice platform combining adaptive problem recommendations with a pedagogical AI Tutor powered by Google Gemini.
-
-### 0:40–1:10 — Core Workflow
-- Demonstrate the live flow on [codeme-phi.vercel.app](https://codeme-phi.vercel.app/):
-  1. Review the **Dashboard** overview and current recommendation.
-  2. Navigate to **Recommendation** to inspect the explainable rationale.
-  3. Open a **Problem** to view description, examples with explanations, and constraints.
-  4. Record an **Attempt** (e.g., Solved or Needs Review) and observe the recommendation adapt.
-
-### 1:10–1:30 — Explainability & Analytics
-- Show the **Analytics** page:
-  - Topic mastery breakdown across algorithmic categories.
-  - Weakness identification and how it feeds into future candidate scoring.
-  - Practice streaks, completion rates, and problem history.
-
-### 1:30–1:50 — AI Tutor Demonstration
-- Open a challenging problem and click **Get Hints**:
-  - Show **Hint 1 · Concept** (conceptual nudge, no code dump).
-  - Reveal **Hint 2 · Strategy** and **Hint 3 · Implementation** locally from memory without additional API calls.
-  - Highlight the 15-second cooldown and request deduplication protecting API quota.
-
-### 1:50–2:00 — Technical Decision & Wrap-Up
-- Summarize architecture and engineering rigor:
-  - React 19/Vite SPA on Vercel connecting to Node.js/Express API on Render, MongoDB Atlas, and Gemini.
-  - 104 curated problems, 30/30 backend tests, 16/16 frontend tests, deterministic scoring, and deployed live.
-
----
-
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 19, Vite, Vanilla CSS Design System, Oxlint

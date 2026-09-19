@@ -1,7 +1,8 @@
 import cors from 'cors'
 import express from 'express'
-import healthRoutes from './routes/healthRoutes.js'
+import aiRoutes from './routes/aiRoutes.js'
 import attemptRoutes from './routes/attemptRoutes.js'
+import healthRoutes from './routes/healthRoutes.js'
 import problemRoutes from './routes/problemRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 
@@ -14,6 +15,8 @@ app.use('/api', healthRoutes)
 app.use('/api/problems', problemRoutes)
 app.use('/api/attempts', attemptRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/ai', aiRoutes)
+
 
 app.use((error, _request, response, _next) => {
   console.error(error)

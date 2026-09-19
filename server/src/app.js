@@ -8,7 +8,27 @@ import userRoutes from './routes/userRoutes.js'
 
 const app = express()
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }))
+const clientUrl = process.env.CLIENT_URL
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  ...(clientUrl
+    ? clientUrl.split(',').map((url) => url.trim().replace(/\/+$/, ''))
+    : []),
+]
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, server-to-server, Render health checks)
+      if (!origin || allowedOrigins.includes(origin) || (origin.endsWith('.vercel.app') && allowedOrigins.some((o) => o.includes('vercel.app')))) {
+        return callback(null, true)
+      }
+      return callback(null, false)
+    },
+    credentials: true,
+  })
+)
 app.use(express.json())
 
 app.use('/api', healthRoutes)

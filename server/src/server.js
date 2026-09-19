@@ -7,5 +7,5 @@ const port = process.env.PORT || 5000
 connectDatabase()
 
 app.listen(port, () => {
-  console.info(`CodeMe API listening at http://localhost:${port}`)
+  console.info(`CodeMe API listening on port ${port}`)
 })

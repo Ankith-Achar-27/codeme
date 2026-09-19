@@ -8,7 +8,10 @@ async function request(path, options = {}) {
   const payload = await response.json().catch(() => ({}))
 
   if (!response.ok || !payload.success) {
-    throw new Error(payload.message || 'Unable to complete that request.')
+    const error = new Error(payload.message || 'Unable to complete that request.')
+    error.status = response.status
+    error.payload = payload
+    throw error
   }
 
   return payload

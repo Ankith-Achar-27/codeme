@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { api } from '../services/api.js'
 
 const factorLabels = {
-  topicWeakness: 'Topic opportunity',
-  difficultyFit: 'Difficulty fit',
-  failureRelevance: 'Recent struggle relevance',
-  conceptRelevance: 'Concept relevance',
-  recency: 'Practice gap',
+  topicWeakness: { label: 'Topic opportunity', hint: 'Focuses on areas with room for mastery growth' },
+  difficultyFit: { label: 'Difficulty fit', hint: 'Tailored to your current demonstrated solve tier' },
+  failureRelevance: { label: 'Struggle relevance', hint: 'Reinforces patterns from recent failed attempts' },
+  conceptRelevance: { label: 'Concept continuity', hint: 'Connects with concepts from past problems' },
+  recency: { label: 'Spaced repetition', hint: 'Revisits skills that have not been practiced recently' },
 }
 
 function RecommendationPage({ user, onProblemClick }) {
@@ -23,24 +23,125 @@ function RecommendationPage({ user, onProblemClick }) {
     return () => { active = false }
   }, [user._id])
 
-  if (loading) return <section className="page"><p className="state">Finding your next problem…</p></section>
-  if (error) return <section className="page"><p className="state error">We could not generate a recommendation right now. Please make sure the API and database are available, then try again.</p></section>
-  if (!recommendation?.problem) return <section className="page"><p className="state">No recommendation is available yet. Add problems to the catalog and try again.</p></section>
+  if (loading) {
+    return (
+      <section className="page recommendation-page">
+        <div className="state-box">
+          <div className="spinner" />
+          <p>Analyzing your attempt history & generating personalized recommendation…</p>
+        </div>
+      </section>
+    )
+  }
 
-  const { problem, explanation, factors, targetTopic, recommendedDifficulty } = recommendation
-  return <section className="page recommendation-page">
-    <p className="eyebrow">Personalized practice</p>
-    <h2>Your Next Problem</h2>
-    <p>Focused on {targetTopic} at a {recommendedDifficulty} level that fits your current history.</p>
-    <article className="recommendation-card">
-      <div className="recommendation-heading"><div><span className={`difficulty ${problem.difficulty.toLowerCase()}`}>{problem.difficulty}</span><h3>{problem.title}</h3></div></div>
-      <div className="tag-list">{problem.topics.map((topic) => <span key={topic}>{topic}</span>)}</div>
-      {problem.concepts?.length > 0 && <p className="concepts"><strong>Concepts:</strong> {problem.concepts.join(', ')}</p>}
-      <section className="why-card"><p className="eyebrow">Why this problem?</p><p>{explanation}</p></section>
-      <section><h3>Recommendation factors</h3><div className="factor-list">{Object.entries(factors).map(([factor, value]) => <div key={factor}><span>{factorLabels[factor]}</span><strong>{Math.round(value * 100)}%</strong></div>)}</div></section>
-      <button className="button primary" onClick={() => onProblemClick(problem._id)}>Open problem</button>
-    </article>
-  </section>
+  if (error) {
+    return (
+      <section className="page recommendation-page">
+        <div className="state-box error-box">
+          <h3>Recommendation Service Unavailable</h3>
+          <p>We could not compute a recommendation right now. Please ensure MongoDB and the API are running.</p>
+        </div>
+      </section>
+    )
+  }
+
+  if (!recommendation?.problem) {
+    return (
+      <section className="page recommendation-page">
+        <div className="empty-state-card">
+          <div className="empty-state-icon">🎯</div>
+          <h3>No problems available</h3>
+          <p>No recommendation could be generated. Please make sure the DSA catalog has been seeded.</p>
+        </div>
+      </section>
+    )
+  }
+
+  const { problem, explanation, factors, targetTopic, recommendedDifficulty, score } = recommendation
+  const diffClass = problem.difficulty.toLowerCase()
+  const matchPercentage = Math.round((score || 0.75) * 100)
+
+  return (
+    <section className="page recommendation-page">
+      <div className="section-heading recommendation-header">
+        <div>
+          <p className="eyebrow">Algorithmic Recommendation</p>
+          <h2>Your Next Practice Challenge</h2>
+          <p>
+            Targeting <strong>{targetTopic}</strong> at the recommended <strong>{recommendedDifficulty}</strong> tier based on your solving history.
+          </p>
+        </div>
+      </div>
+
+      <article className="spotlight-problem-card">
+        <div className="spotlight-card-top">
+          <div className="spotlight-badges">
+            <span className={`difficulty-badge diff-${diffClass}`}>{problem.difficulty}</span>
+            <span className="target-topic-pill">Target: {targetTopic}</span>
+          </div>
+          <div className="match-score-pill">
+            <span>Algorithm Match:</span>
+            <strong>{matchPercentage}%</strong>
+          </div>
+        </div>
+
+        <h3 className="spotlight-title">{problem.title}</h3>
+
+        <div className="tag-list spotlight-tags">
+          {problem.topics.map((topic) => (
+            <span className="topic-chip" key={topic}>{topic}</span>
+          ))}
+        </div>
+
+        {problem.concepts?.length > 0 && (
+          <p className="spotlight-concepts">
+            <strong>Key concepts:</strong> {problem.concepts.join(', ')}
+          </p>
+        )}
+
+        {/* Why this problem? */}
+        <div className="why-callout-card">
+          <div className="why-callout-head">
+            <span className="why-icon" aria-hidden="true">💡</span>
+            <h4>Why this problem?</h4>
+          </div>
+          <p className="why-explanation-text">{explanation}</p>
+        </div>
+
+        {/* Factor Breakdown */}
+        <div className="factors-section">
+          <h4>Scoring Factor Weights</h4>
+          <div className="factors-grid">
+            {Object.entries(factors).map(([factor, value]) => {
+              const info = factorLabels[factor] || { label: factor, hint: '' }
+              const pct = Math.round(value * 100)
+              return (
+                <div key={factor} className="factor-tile">
+                  <div className="factor-tile-top">
+                    <span className="factor-name">{info.label}</span>
+                    <strong className="factor-pct">{pct}%</strong>
+                  </div>
+                  <div className="factor-bar-track">
+                    <div className="factor-bar-fill" style={{ width: `${Math.min(100, pct)}%` }} />
+                  </div>
+                  <span className="factor-hint">{info.hint}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="spotlight-cta-bar">
+          <button
+            className="button primary large-cta"
+            onClick={() => onProblemClick(problem._id)}
+          >
+            Start Solving Problem →
+          </button>
+        </div>
+      </article>
+    </section>
+  )
 }
 
 export default RecommendationPage

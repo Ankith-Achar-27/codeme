@@ -6,7 +6,9 @@ import {
   generateAiExplanation,
   generateAiHint,
   isAiConfigured,
+  normalizeHintText,
 } from '../src/services/aiService.js'
+import { formatAiText } from '../../client/src/utils/formatAiText.js'
 
 const mockProblem = {
   _id: '507f1f77bcf86cd799439011',
@@ -242,5 +244,45 @@ test('10. Existing analytics calculation still works and reflects attempt histor
   assert.equal(analytics.overview.uniqueProblemsSolved, 1)
   assert.equal(analytics.overview.totalHintsUsed, 1)
   assert.equal(analytics.overview.overallSuccessRate, 100)
+})
+
+test('11. normalizeHintText cleans LaTeX math delimiters, markdown headings, and artifacts', () => {
+  const rawWithArtifacts = '## Hint 1: What if you track the remainder $k$?'
+  assert.equal(normalizeHintText(rawWithArtifacts), 'What if you track the remainder k?')
+
+  const rawWithFirstTag = '#first Think about $target - nums[i]$ using a hash map.'
+  assert.equal(normalizeHintText(rawWithFirstTag), 'Think about target - nums[i] using a hash map.')
+
+  const rawJson = '{\n  "hint": "Try storing complements in a dictionary."\n}'
+  assert.equal(normalizeHintText(rawJson), 'Try storing complements in a dictionary.')
+
+  const rawQuoted = '"Ask yourself: what information would you need from past elements?"'
+  assert.equal(normalizeHintText(rawQuoted), 'Ask yourself: what information would you need from past elements?')
+})
+
+test('12. buildHintPrompt enforces DSA tutor persona, negative constraints, and pedagogical rules', () => {
+  const { systemMessage, userMessage } = buildHintPrompt(mockProblem, 1)
+
+  assert.match(systemMessage, /patient DSA tutor, not a solution generator/i)
+  assert.match(systemMessage, /Never reveal the complete solution/i)
+  assert.match(systemMessage, /Never provide complete code/i)
+  assert.match(systemMessage, /Do not output LaTeX/i)
+  assert.match(systemMessage, /Do not output Markdown heading syntax/i)
+  assert.match(userMessage, /Level 1 Hint \(Conceptual Direction/i)
+})
+
+test('13. formatAiText normalizes LaTeX, Markdown headings, and bold emphasis while preserving notation', () => {
+  const cases = [
+    { in: 'compute the remainder modulo $$k$$', out: 'compute the remainder modulo k' },
+    { in: '$$target - nums[i]$$', out: 'target - nums[i]' },
+    { in: '# Think about the data structure', out: 'Think about the data structure' },
+    { in: 'Use **a hash map** to store values.', out: 'Use a hash map to store values.' },
+    { in: 'Consider O(n) time and O(1) space.', out: 'Consider O(n) time and O(1) space.' },
+    { in: 'Use nums[i] and target - nums[i].', out: 'Use nums[i] and target - nums[i].' },
+  ]
+
+  for (const tc of cases) {
+    assert.equal(formatAiText(tc.in), tc.out)
+  }
 })
 
